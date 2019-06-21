@@ -23,9 +23,6 @@ import game from "natives";
 		return 1;
 	}
  */
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 function loadModel(model) {
     return new Promise(
@@ -35,10 +32,18 @@ function loadModel(model) {
             if(game.isModelInCdimage(_model) && game.isModelValid(_model)) {
                 game.requestModel(_model);
     
-                while(!game.hasModelLoaded(_model))
-                    await sleep(1);
-            
-                resolve(_model)
+                let after = () => {resolve(_model)};
+                let check = () => {
+                    if(game.hasModelLoaded(_model))
+                        after();
+                    
+                    else setTimeout(
+                        check,
+                        10
+                    )
+                };
+
+                check();
             }
     
             else reject("altmp-js-prop-spawner loadModel was triggered with invalid model!");
@@ -46,11 +51,8 @@ function loadModel(model) {
     )
 }
 
-class Prop {
-    id = null;
-
-    constructor(model, pos, dynamic) {
-        loadModel(model)
+export function createProp(model, pos, dynamic, callback) {
+    loadModel(model)
         .then(
             (_model) => {
                 this.id = game.createObjectNoOffset(
@@ -63,22 +65,17 @@ class Prop {
 
                 if (!dynamic)
                     game.freezeEntityPosition(this.id, true);
-            }
-        ).catch(
-            (e) => {
-                alt.warn(e);
-            }
-        );
-    }
 
-    destroy = () => {
-        if(this.id !== null) {
-            if(game.doesEntityExist(this.id))
-                game.deleteEntity(this.id);
-
-            this.id = null;
-        }
-    }
+                callback(id);
+            }
+        )
 }
 
-export default Prop;
+export function destroyProp(id) {
+    if(id !== null) {
+        if(game.doesEntityExist(id))
+            game.deleteEntity(id);
+
+        id = null;
+    }
+}
