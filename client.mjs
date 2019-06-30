@@ -55,7 +55,7 @@ export function createProp(model, pos, dynamic, callback) {
     loadModel(model)
         .then(
             (_model) => {
-                this.id = game.createObjectNoOffset(
+                let id = game.createObjectNoOffset(
                     _model, 
                     pos.x, pos.y, pos.z, 
                     false, true, dynamic
@@ -64,14 +64,17 @@ export function createProp(model, pos, dynamic, callback) {
                 game.setModelAsNoLongerNeeded(_model);
 
                 if (!dynamic)
-                    game.freezeEntityPosition(this.id, true);
+                    game.freezeEntityPosition(id, true);
 
+                    alt.log(`CreatePROP ${id}`);
                 callback(id);
             }
         )
 }
 
 export function destroyProp(id) {
+    alt.log(`DestroyPROP ${id}`);
+
     if(id !== null) {
         if(game.doesEntityExist(id))
             game.deleteEntity(id);
