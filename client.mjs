@@ -29,6 +29,14 @@ function loadModel(model) {
 }
 
 let PROPS_LIST = [];
+
+let findUnusedPropID = () => {
+    for(let i = 0; i < PROPS_LIST.length; i++)
+        if(PROPS_LIST[i] === undefined) return i;
+
+    return PROPS_LIST.length;
+};
+
 export default {
     /**
      * @param model - STRING model;
@@ -36,15 +44,10 @@ export default {
      * @param options - OBJECT {dynamic} options;
      */
     new: (model, {x, y, z}, {dynamic}) => {
-        let id = PROPS_LIST.length;
-        PROPS_LIST.forEach(
-            (prop, index) => {
-                if(prop === undefined) id = index;
-            }
-        );
+        let id = findUnusedPropID();
         PROPS_LIST[id] = {
             destroy: () => {},
-            getPosition: () => { return {x: 0, y: 0, z: 0}; }
+            getPosition: () => { return {x: x, y: y, z: z}; }
         };
 
         loadModel(model)
@@ -61,8 +64,15 @@ export default {
 
                 game.setModelAsNoLongerNeeded(modelHash);
 
-                 if (!dynamic)
+                if (!dynamic) {
                     game.freezeEntityPosition(prop.instance, true);
+                    
+                    prop.savedPos = {
+                        x: x,
+                        y: y,
+                        z: z
+                    };
+                }
 
                 return prop;
             }
@@ -80,11 +90,14 @@ export default {
                 };
 
                 prop.getPosition = () => {
+                    if(prop.savedPos != undefined)
+                        return prop.savedPos;
+
                     return game.getEntityCoords(
                         prop.instance,
                         false
                     );
-                }
+                };
             }
         ).catch(
             (e) => {
