@@ -42,7 +42,10 @@ export default {
                 if(prop === undefined) id = index;
             }
         );
-        PROPS_LIST[id] = {};
+        PROPS_LIST[id] = {
+            destroy: () => {},
+            getPosition: () => { return {x: 0, y: 0, z: 0}; }
+        };
 
         loadModel(model)
         .then( //new fnc.
@@ -75,6 +78,13 @@ export default {
 
                     PROPS_LIST[id] = undefined;
                 };
+
+                prop.getPosition = () => {
+                    return game.getEntityCoords(
+                        prop.instance,
+                        false
+                    );
+                }
             }
         ).catch(
             (e) => {
@@ -85,8 +95,11 @@ export default {
         return {
             id: id,
             destroy: () => {
-                PROPS_LIST[id].destroy();
-            }
+                PROPS_LIST[this.id].destroy();
+            },
+            get position() {
+                return PROPS_LIST[this.id].getPosition();
+            },
         };
     }
 };
