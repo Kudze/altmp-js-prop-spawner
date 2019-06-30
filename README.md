@@ -3,6 +3,7 @@
 ## Description
 
 This adds client-side utilities to help you spawn gtav props on alt:v.
+(Loads 3D Prop model asyncronomously)
 
 RoadMap:
 * Add container utilities. (foreach, get(id), and more...)
