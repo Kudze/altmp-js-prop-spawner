@@ -43,7 +43,7 @@ export default {
      * @param pos - OBJECT {x, y, z} pos;
      * @param options - OBJECT {dynamic} options;
      */
-    new: (model, {x, y, z}, {dynamic}) => {
+    new: (model, {x, y, z}, {dynamic = false}) => {
         let id = findUnusedPropID();
         PROPS_LIST[id] = {
             destroy: () => {},
