@@ -28,35 +28,65 @@ function loadModel(model) {
     )
 }
 
-
-export default class Prop {
-
-    constructor(model, pos, dynamic) {
-        this.id = null;
+let PROPS_LIST = [];
+export default {
+    /**
+     * @param model - STRING model;
+     * @param pos - OBJECT {x, y, z} pos;
+     * @param options - OBJECT {dynamic} options;
+     */
+    new: (model, {x, y, z}, {dynamic}) => {
+        let id = PROPS_LIST.length;
+        PROPS_LIST.forEach(
+            (prop, index) => {
+                if(prop === undefined) id = index;
+            }
+        );
+        PROPS_LIST[id] = {};
 
         loadModel(model)
-        .then(
-            (_model) => {
-                this.id = game.createObjectNoOffset(
-                    _model, 
-                    pos.x, pos.y, pos.z, 
+        .then( //new fnc.
+            (modelHash) => {
+                let prop = PROPS_LIST[id];
+                if(prop === undefined) throw "altmp-js-prop-spawner prop was deleted, before creation finished!";
+
+                prop.instance = game.createObjectNoOffset(
+                    modelHash, 
+                    x, y, z, 
                     false, true, dynamic
                 );
 
-                game.setModelAsNoLongerNeeded(_model);
+                game.setModelAsNoLongerNeeded(modelHash);
 
-                if (!dynamic)
-                    game.freezeEntityPosition(this.id, true);
+                 if (!dynamic)
+                    game.freezeEntityPosition(prop.instance, true);
+
+                return prop;
             }
-        )
-    }
+        ).then( //Destroy func.
+            (prop) => {
+                prop.destroy = () => {
+                    if(prop !== undefined) {
+                        if(game.doesEntityExist(prop.instance))
+                            game.deleteEntity(prop.instance);
+                
+                        prop.instance = null;
+                    }
 
-    destroy() {
-        if(this.id !== null) {
-            if(game.doesEntityExist(this.id))
-                game.deleteEntity(this.id);
-    
-            this.id = null;
-        }
+                    PROPS_LIST[id] = undefined;
+                };
+            }
+        ).catch(
+            (e) => {
+                alt.warn(e);
+            }
+        );
+
+        return {
+            id: id,
+            destroy: () => {
+                PROPS_LIST[id].destroy();
+            }
+        };
     }
-}
+};
