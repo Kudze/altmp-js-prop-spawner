@@ -43,7 +43,7 @@ export default {
      * @param pos - OBJECT {x, y, z} pos;
      * @param options - OBJECT {dynamic} options;
      */
-    new: (model, {x, y, z}, {dynamic = false}) => {
+    new: (model, {x, y, z}, {dynamic = false} = {}) => {
         let id = findUnusedPropID();
         PROPS_LIST[id] = {
             destroy: () => {},
@@ -93,9 +93,11 @@ export default {
                     if(prop.savedPos != undefined)
                         return prop.savedPos;
 
-                    return game.getEntityCoords(
+                    return game.getOffsetFromEntityInWorldCoords(
                         prop.instance,
-                        false
+                        0,
+                        0,
+                        0
                     );
                 };
             }
@@ -106,12 +108,11 @@ export default {
         );
 
         return {
-            id: id,
-            destroy: () => {
-                PROPS_LIST[this.id].destroy();
+            destroy() {
+                PROPS_LIST[id].destroy();
             },
-            get position() {
-                return PROPS_LIST[this.id].getPosition();
+            getPosition() {
+                return PROPS_LIST[id].getPosition();
             },
         };
     }
