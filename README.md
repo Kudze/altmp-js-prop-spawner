@@ -1,4 +1,4 @@
-# altmp-js-network-streamer
+# altmp-js-prop-spawner
 
 ## Description
 
